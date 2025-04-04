@@ -13,15 +13,27 @@ import { signOut, useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MdHelp, MdPerson, MdSettings } from "react-icons/md";
 import { toast } from "sonner";
 import AvatarImg from "../avatarImg";
+import { useUserStore } from "@/lib/store";
 
 export default function Header() {
+  const { user, setUser } = useUserStore();
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (session?.user) {
+      setUser(session.user);
+    }
+  }, [session?.user, setUser]);
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 mx-auto w-full border-b backdrop-blur">
@@ -78,10 +90,10 @@ export default function Header() {
                   <DropdownMenuLabel className="font-normal p-4">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        {session.user.name}
+                        {user.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {session.user.email}
+                        {user.email}
                       </p>
                     </div>
                   </DropdownMenuLabel>

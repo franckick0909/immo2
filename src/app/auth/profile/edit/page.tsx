@@ -15,11 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useSession } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { useUserStore } from "@/lib/store";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MdAddAPhoto, MdDelete } from "react-icons/md";
 import { toast } from "sonner";
 import { deleteAccount, updateProfile } from "./actions";
@@ -34,6 +34,19 @@ export default function ProfileEditPage() {
     session?.user?.image || null
   );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [formData, setFormData] = useState({
+    name: session?.user?.name || "",
+    email: session?.user?.email || "",
+  });
+
+  useEffect(() => {
+    if (session?.user) {
+      setFormData({
+        name: session.user.name || "",
+        email: session.user.email || "",
+      });
+    }
+  }, [session?.user]);
 
   if (!session?.user) {
     return null;
@@ -65,6 +78,7 @@ export default function ProfileEditPage() {
       if (result.success && result.user?.image) {
         toast.success("Photo de profil mise à jour avec succès");
         updateUser({ image: result.user.image });
+        setSelectedFile(null);
       } else {
         throw new Error(result.error);
       }
@@ -76,13 +90,23 @@ export default function ProfileEditPage() {
     }
   }
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setIsLoading(true);
     try {
-      const result = await updateProfile(formData);
+      const form = new FormData();
+      form.append("name", formData.name);
+      form.append("email", formData.email);
+
+      const result = await updateProfile(form);
       if (result.success) {
         toast.success("Profil mis à jour avec succès");
         updateUser({
+          name: result.user?.name || "",
+          email: result.user?.email || "",
+        });
+        // Mise à jour des valeurs du formulaire avec les nouvelles données
+        setFormData({
           name: result.user?.name || "",
           email: result.user?.email || "",
         });
@@ -103,6 +127,7 @@ export default function ProfileEditPage() {
       const result = await deleteAccount();
       if (result.success) {
         toast.success("Compte supprimé avec succès");
+        await signOut();
         router.push("/");
       } else {
         throw new Error(result.error);
@@ -194,13 +219,16 @@ export default function ProfileEditPage() {
             <CardTitle>Informations personnelles</CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Nom</Label>
                 <Input
                   id="name"
                   name="name"
-                  defaultValue={session.user.name}
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -211,7 +239,10 @@ export default function ProfileEditPage() {
                   id="email"
                   name="email"
                   type="email"
-                  defaultValue={session.user.email}
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -223,33 +254,101 @@ export default function ProfileEditPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-destructive">
+        <Card className="border-destructive/50">
           <CardHeader>
-            <CardTitle className="text-destructive">Zone de danger</CardTitle>
+            <CardTitle className="text-destructive flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5"
+              >
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              </svg>
+              Zone de danger
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" disabled={isLoading}>
+                <Button
+                  variant="destructive"
+                  className="w-full sm:w-auto"
+                  disabled={isLoading}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-4 h-4 mr-2"
+                  >
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                  </svg>
                   Supprimer le compte
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent className="sm:max-w-[425px] zoom-in-95 duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:duration-200">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogTitle className="text-xl font-semibold">
+                    Êtes-vous sûr ?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-muted-foreground">
                     Cette action est irréversible. Cela supprimera
                     définitivement votre compte et toutes vos données associées.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogFooter className="gap-2 sm:gap-0">
+                  <AlertDialogCancel className="mt-0">
+                    Annuler
+                  </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDeleteAccount}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    className="bg-destructive text-white hover:bg-destructive/90"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Suppression..." : "Supprimer le compte"}
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <svg
+                          className="animate-spin h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        Suppression...
+                      </div>
+                    ) : (
+                      "Supprimer le compte"
+                    )}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

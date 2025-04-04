@@ -4,6 +4,7 @@ import { nextCookies } from "better-auth/next-js";
 import { prisma } from "./prisma";
 import { resend } from "./resend";
 
+
 interface GitHubProfile {
   id: number;
   login: string;
@@ -25,6 +26,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    allowLinkAccounts: true,
     async sendResetPassword(data) {
       await resend.emails.send({
         from: "onboarding@resend.dev",
