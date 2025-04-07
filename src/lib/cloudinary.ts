@@ -1,6 +1,7 @@
 "use server";
 
 import { v2 as cloudinary } from "cloudinary";
+import { toast } from "sonner";
 
 // Configuration de Cloudinary (côté serveur uniquement)
 cloudinary.config({
@@ -38,6 +39,7 @@ export async function uploadImageToCloudinary(
     return result.secure_url;
   } catch (error) {
     console.error("Erreur lors de l'upload vers Cloudinary:", error);
+    toast.error(`Erreur lors de l'upload de l'image: ${error}`);
     throw new Error("Échec de l'upload de l'image");
   }
 }
@@ -58,6 +60,7 @@ export async function deleteImageFromCloudinary(
     return true;
   } catch (error) {
     console.error("Erreur lors de la suppression de l'image:", error);
+    toast.error(`Erreur lors de la suppression de l'image: ${error}`);
     return false;
   }
 }

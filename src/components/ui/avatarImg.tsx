@@ -6,14 +6,14 @@ import Image from "next/image";
 import { useEffect } from "react";
 
 export default function AvatarImg() {
-  const { data: session } = useSession();
+  const session = useSession();
   const { user, setUser } = useUserStore();
 
   useEffect(() => {
-    if (session?.user) {
-      setUser(session.user);
+    if (session?.data?.user) {
+      setUser(session.data.user);
     }
-  }, [session?.user, setUser]);
+  }, [session?.data?.user, setUser]);
 
   if (!user) {
     return null;

@@ -48,7 +48,7 @@ export default function ResetPassword() {
                       toast.success(
                         "Un email de réinitialisation de mot de passe a été envoyé"
                       );
-                      router.push("/auth/sign-in");
+                      router.push("/auth/signin");
                     },
                   },
                 });
@@ -105,7 +105,7 @@ export default function ResetPassword() {
                     },
                     onSuccess: () => {
                       toast.success("Mot de passe réinitialisé avec succès");
-                      router.push("/auth/sign-in");
+                      router.push("/");
                     },
                   },
                 });
@@ -125,7 +125,7 @@ export default function ResetPassword() {
         </Card>
         <div className="mt-6 text-center">
           <Link
-            href="/auth/sign-in"
+            href="/auth/signin"
             className="text-sm text-primary hover:text-primary/80 transition-colors"
           >
             Retour à la page d&apos;accueil

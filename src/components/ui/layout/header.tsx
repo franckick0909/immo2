@@ -31,10 +31,6 @@ export default function Header() {
     }
   }, [session?.user, setUser]);
 
-  if (!user) {
-    return null;
-  }
-
   return (
     <header className="sticky top-0 mx-auto w-full border-b backdrop-blur">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -90,10 +86,10 @@ export default function Header() {
                   <DropdownMenuLabel className="font-normal p-4">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        {user.name}
+                        {user?.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {user.email}
+                        {user?.email}
                       </p>
                     </div>
                   </DropdownMenuLabel>

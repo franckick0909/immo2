@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useUserStore } from "@/lib/store";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MdAddAPhoto, MdDelete } from "react-icons/md";
 import { toast } from "sonner";
@@ -49,7 +49,7 @@ export default function ProfileEditPage() {
   }, [session?.user]);
 
   if (!session?.user) {
-    return null;
+    return redirect("/");
   }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,6 +151,10 @@ export default function ProfileEditPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center space-y-4">
+              <p className="text-xs text-gray-500 mb-1">
+                Format recommandé : JPG, PNG. Taille maximale : 2 Mo. Dimensions
+                recommandées : 500x500 pixels.
+              </p>
               <div className="w-32 h-32 rounded-full overflow-hidden">
                 {previewImage ? (
                   <Image

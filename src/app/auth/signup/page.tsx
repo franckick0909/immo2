@@ -42,6 +42,69 @@ export default function SignUp() {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== passwordConfirmation) {
+      toast.error("Les mots de passe ne correspondent pas");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Convertir l'image en base64 si elle existe
+      let imageBase64 = "";
+      if (image) {
+        imageBase64 = await convertImageToBase64(image);
+      }
+
+      await signUp.email({
+        email,
+        password,
+        name: `${firstName} ${lastName}`,
+        image: imageBase64,
+        callbackURL: "/",
+        fetchOptions: {
+          onResponse: () => {
+            setLoading(false);
+          },
+          onRequest: () => {
+            setLoading(true);
+            toast.success(
+              "Votre email a été envoyé, veuillez vérifier votre email"
+            );
+          },
+          onError: (ctx) => {
+            if (ctx.error.status === 403) {
+              toast.error(
+                ctx.error.message +
+                  "Votre email n'est pas vérifié, veuillez vérifier votre email"
+              );
+            } else {
+              toast.error(ctx.error.message);
+            }
+          },
+          onSuccess: async () => {
+            toast.success("Compte créé avec succès");
+            setFirstName("");
+            setLastName("");
+            setEmail("");
+            setPassword("");
+            setPasswordConfirmation("");
+            setImage(null);
+            setImagePreview(null);
+            router.push("/");
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'inscription:", error);
+      toast.error("Une erreur est survenue lors de l'inscription");
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-center items-center h-screen w-full">
       <Card className="z-50 rounded-md-none max-w-md w-full">
@@ -52,7 +115,7 @@ export default function SignUp() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4">
+          <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="first-name">Prénom</Label>
@@ -116,6 +179,10 @@ export default function SignUp() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="image">Image de profil (optionnel)</Label>
+              <p className="text-xs text-gray-500 mb-1">
+                Format recommandé : JPG, PNG. Taille maximale : 2 Mo. Dimensions
+                recommandées : 500x500 pixels.
+              </p>
               <div className="flex items-end gap-4">
                 {imagePreview && (
                   <div className="relative w-16 h-16 rounded-sm overflow-hidden">
@@ -147,51 +214,14 @@ export default function SignUp() {
                 </div>
               </div>
             </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-              onClick={async () => {
-                await signUp.email({
-                  email,
-                  password,
-                  name: `${firstName} ${lastName}`,
-                  image: image ? await convertImageToBase64(image) : "",
-                  callbackURL: "/auth/signin",
-                  fetchOptions: {
-                    onResponse: () => {
-                      setLoading(false);
-                    },
-                    onRequest: () => {
-                      setLoading(true);
-                    },
-                    onError: (ctx) => {
-                      toast.error(
-                        ctx.error.message + "c'est quoi le message ?"
-                      );
-                    },
-                    onSuccess: async () => {
-                      toast.success("Compte créé avec succès");
-                      setFirstName("");
-                      setLastName("");
-                      setEmail("");
-                      setPassword("");
-                      setPasswordConfirmation("");
-                      setImage(null);
-                      setImagePreview(null);
-                      router.push("/auth/signin");
-                    },
-                  },
-                });
-              }}
-            >
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
                 "Créer un compte"
               )}
             </Button>
-          </div>
+          </form>
         </CardContent>
         <CardFooter>
           <div className="flex justify-center w-full border-t py-4">
