@@ -3,134 +3,125 @@
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardTitle,
-  CardHeader,
   CardContent,
   CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { toast } from "sonner";
 
-export default function ResetPassword() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  if (!token) {
-    // Formulaire de demande de réinitialisation de mot de passe
-    return (
-      <div className="flex flex-col justify-center items-center h-screen w-full">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Réinitialisation de mot de passe</CardTitle>
-            <CardDescription>
-              Entrez votre email pour recevoir un lien de réinitialisation de
-              mot de passe et réinitialiser votre mot de passe.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              className="space-y-4"
-              action={async (formData) => {
-                const email = formData.get("email");
-                await authClient.forgetPassword({
-                  email: email as string,
-                  redirectTo: "/auth/reset-password",
-                  fetchOptions: {
-                    onResponse: () => {
-                      toast.error("Une erreur est survenue");
-                    },
-                    onSuccess: () => {
-                      toast.success(
-                        "Un email de réinitialisation de mot de passe a été envoyé"
-                      );
-                      router.push("/auth/signin");
-                    },
-                  },
-                });
-              }}
-            >
-              <Label htmlFor="email">Votre email</Label>
-              <Input
-                type="email"
-                placeholder="Email"
-                name="email"
-                id="email"
-                required
-              />
-              <Button type="submit">Envoyer</Button>
-            </form>
-          </CardContent>
-        </Card>
-        <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="text-sm text-primary hover:text-primary/80 transition-colors border-b border-primary"
-          >
-            Retour à la page d&apos;accueil
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  // Formulaire de réinitialisation de mot de passe
+    if (password !== passwordConfirmation) {
+      toast.error("Les mots de passe ne correspondent pas");
+      return;
+    }
+
+    if (!token) {
+      toast.error("Token de réinitialisation manquant");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await authClient.resetPassword({
+        newPassword: password,
+        token: token,
+      });
+
+      toast.success("Mot de passe réinitialisé avec succès");
+      router.push("/auth/signin");
+    } catch (error) {
+      console.error(
+        "Erreur lors de la réinitialisation du mot de passe:",
+        error
+      );
+      toast.error("Erreur lors de la réinitialisation du mot de passe");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="password">Nouveau mot de passe</Label>
+        <Input
+          id="password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="password_confirmation">
+          Confirmation du mot de passe
+        </Label>
+        <Input
+          id="password_confirmation"
+          type="password"
+          value={passwordConfirmation}
+          onChange={(e) => setPasswordConfirmation(e.target.value)}
+          required
+        />
+      </div>
+
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+        Réinitialiser le mot de passe
+      </Button>
+    </form>
+  );
+}
+
+export default function ResetPasswordPage() {
   return (
     <div className="flex flex-col justify-center items-center h-screen w-full">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>Réinitialisation du mot de passe</CardTitle>
-            <CardDescription>
-              Entrez votre nouveau mot de passe. {token}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              className="space-y-4"
-              action={async (formData) => {
-                const password = formData.get("password");
-                await authClient.resetPassword({
-                  newPassword: password as string,
-                  token: token as string,
-                  fetchOptions: {
-                    onResponse: () => {
-                      toast.error("Une erreur est survenue");
-                    },
-                    onError: (ctx) => {
-                      toast.error(ctx.error.message);
-                    },
-                    onSuccess: () => {
-                      toast.success("Mot de passe réinitialisé avec succès");
-                      router.push("/");
-                    },
-                  },
-                });
-              }}
-            >
-              <Label htmlFor="password">Votre nouveau mot de passe</Label>
-              <Input
-                type="password"
-                placeholder="Mot de passe"
-                name="password"
-                id="password"
-                required
-              />
-              <Button type="submit">Réinitialiser le mot de passe</Button>
-            </form>
-          </CardContent>
-        </Card>
-        <div className="mt-6 text-center">
-          <Link
-            href="/auth/signin"
-            className="text-sm text-primary hover:text-primary/80 transition-colors"
-          >
-            Retour à la page d&apos;accueil
-          </Link>
-        </div>
-      </div>
+      <Card className="z-50 rounded-md-none max-w-md w-full">
+        <CardHeader>
+          <CardTitle className="text-lg md:text-xl">
+            Réinitialiser le mot de passe
+          </CardTitle>
+          <CardDescription className="text-xs md:text-sm">
+            Entrez votre nouveau mot de passe
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<div>Chargement...</div>}>
+            <ResetPasswordForm />
+          </Suspense>
+        </CardContent>
+        <CardFooter>
+          <div className="flex justify-center w-full border-t py-4">
+            <p className="text-center text-xs text-neutral-500">
+              Vous avez déjà un compte ?{" "}
+              <Link href="/auth/signin" className="underline">
+                <span className="text-orange-500 font-bold">Connexion</span>
+              </Link>
+            </p>
+          </div>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
