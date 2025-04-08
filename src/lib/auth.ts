@@ -92,11 +92,6 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
       scope: ["email", "profile"],
     },
-    linkedin: {
-      clientId: process.env.LINKEDIN_CLIENT_ID as string,
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET as string,
-      scope: ["r_emailaddress", "r_liteprofile"],
-    },
   },
   plugins: [admin(), nextCookies()],
 });
