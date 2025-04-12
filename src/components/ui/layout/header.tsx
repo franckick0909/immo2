@@ -18,6 +18,7 @@ import { MdHelp, MdPerson, MdSettings } from "react-icons/md";
 import { toast } from "sonner";
 import AvatarImg from "../avatarImg";
 import { useUserStore } from "@/lib/store";
+import { navLinks } from "@/app/datas/datas";
 
 export default function Header() {
   const { user, setUser } = useUserStore();
@@ -44,27 +45,11 @@ export default function Header() {
           </div>
 
           <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/auth/profile"
-              className="flex items-center space-x-1 text-base font-medium text-muted-foreground transition-colors hover:text-primary"
-            >
-              <MdPerson className="h-4 w-4" />
-              <span>Mon profil</span>
-            </Link>
-            <Link
-              href="/auth/profile/edit"
-              className="flex items-center space-x-1 text-base font-medium text-muted-foreground transition-colors hover:text-primary"
-            >
-              <MdSettings className="h-4 w-4" />
-              <span>Paramètres</span>
-            </Link>
-            <Link
-              href="/"
-              className="flex items-center space-x-1 text-base font-medium text-muted-foreground transition-colors hover:text-primary"
-            >
-              <MdHelp className="h-4 w-4" />
-              <span>Aide</span>
-            </Link>
+            {navLinks.map((link) => (
+              <Link key={link.id} href={link.href} onClick={(e) => e.preventDefault()} className="text-sm font-medium">
+                {link.title}
+              </Link>
+            ))}
           </nav>
 
           <div className="flex items-center gap-4">
@@ -97,7 +82,7 @@ export default function Header() {
                   <div className="p-2">
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/auth/profile"
+                        href="/profile"
                         className="flex items-center gap-2 cursor-pointer rounded-md p-2 hover:bg-primary/10"
                       >
                         <MdPerson className="h-4 w-4" />
@@ -106,7 +91,7 @@ export default function Header() {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/auth/profile/edit"
+                        href="/profile/edit"
                         className="flex items-center gap-2 cursor-pointer rounded-md p-2 hover:bg-primary/10"
                       >
                         <MdSettings className="h-4 w-4" />
@@ -145,7 +130,7 @@ export default function Header() {
                   buttonVariants({ variant: "default" }),
                   "font-medium"
                 )}
-                href="/auth/signin"
+                href="/signin"
               >
                 Se connecter
               </Link>

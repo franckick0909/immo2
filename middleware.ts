@@ -2,8 +2,8 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-const authRoutes = ["/auth/signin", "/auth/signup", "/auth/profile", "/auth/profile/edit", "/auth/verify-email"];
-const passwordRoutes = ["/auth/reset-password"];
+const authRoutes = ["/signin", "/signup", "/profile", "/profile/edit", "/emailVerification"];
+const passwordRoutes = ["/reset-password"];
 
 export default async function middleware(request: NextRequest) {
   const pathName = request.nextUrl.pathname;
@@ -19,7 +19,7 @@ export default async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    return NextResponse.redirect(new URL("/auth/signin", request.url));
+    return NextResponse.redirect(new URL("/signin", request.url));
   }
   return NextResponse.next();
 }
