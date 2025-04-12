@@ -21,7 +21,7 @@ import {
 export default async function ProfilePage() {
   const user = await getUser();
   if (!user) {
-    redirect("/auth/signin");
+    redirect("/signin");
   }
 
   const accounts = await auth.api.listUserAccounts({

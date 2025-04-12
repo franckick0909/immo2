@@ -56,7 +56,7 @@ export default function SignIn() {
               <div className="flex items-center">
                 <Label htmlFor="password">Mot de passe</Label>
                 <Link
-                  href="/auth/reset-password"
+                  href="/reset-password"
                   className="ml-auto inline-block text-sm underline"
                 >
                   Mot de passe oublié ?
@@ -116,7 +116,7 @@ export default function SignIn() {
                       setEmail("");
                       setPassword("");
                       setRememberMe(false);
-                      router.push("/auth/profile");
+                      router.push("/profile");
                     },
                   }
                 );
@@ -157,7 +157,7 @@ export default function SignIn() {
                       },
                       onSuccess: () => {
                         toast.success("Connexion réussie");
-                        router.push("/auth/profile");
+                        router.push("/profile");
                       },
                     }
                   );
@@ -236,7 +236,7 @@ export default function SignIn() {
           <div className="flex justify-center w-full border-t py-4">
             <p className="text-center text-xs text-neutral-500">
               Vous n&apos;avez pas de compte ?{" "}
-              <Link href="/auth/signup" className="underline">
+              <Link href="/signup" className="underline">
                 <span className="text-orange-500 font-bold">
                   Créer un compte
                 </span>

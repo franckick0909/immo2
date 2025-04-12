@@ -227,7 +227,7 @@ export default function SignUp() {
           <div className="flex justify-center w-full border-t py-4">
             <p className="text-center text-xs text-neutral-500">
               Vous avez déjà un compte ?{" "}
-              <Link href="/auth/signin" className="underline">
+              <Link href="/signin" className="underline">
                 <span className="text-orange-500 font-bold">Connexion</span>
               </Link>
             </p>
