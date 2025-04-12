@@ -28,7 +28,7 @@ export const auth = betterAuth({
       try {
         const result = await sendEmail({
           to: user.email,
-          subject: "Vérifiez votre adresse email",
+          subject: "Confirmez votre adresse email pour activer votre compte",
           text: `Cliquez sur le lien pour vérifier votre email: ${url}`,
         });
 
@@ -63,7 +63,7 @@ export const auth = betterAuth({
         try {
           const result = await sendEmail({
             to: newEmail,
-            subject: "Vérifiez votre changement d'email",
+            subject: "Confirmez votre changement d'email",
             text: `Cliquez sur le lien pour vérifier: ${url}`,
           });
 
