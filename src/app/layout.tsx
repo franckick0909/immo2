@@ -1,3 +1,4 @@
+
 import Header from "@/components/ui/layout/header";
 import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
@@ -13,16 +14,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-      <html lang="fr">
-        <body className={inter.className}>
-          <Header />
-        {children}
-          <Toaster />
-        </body>
-      </html>
+    <html lang="fr">
+      <body className={inter.className}>
+            <Header />
+            {children}
+        <Toaster />
+      </body>
+    </html>
   );
 }

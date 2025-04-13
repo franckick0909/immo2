@@ -1,5 +1,6 @@
 "use client";
 
+import { navLinks } from "@/app/datas/datas";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut, useSession } from "@/lib/auth-client";
+import { useUserStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,8 +19,6 @@ import { useEffect, useState } from "react";
 import { MdHelp, MdPerson, MdSettings } from "react-icons/md";
 import { toast } from "sonner";
 import AvatarImg from "../avatarImg";
-import { useUserStore } from "@/lib/store";
-import { navLinks } from "@/app/datas/datas";
 
 export default function Header() {
   const { user, setUser } = useUserStore();
@@ -33,7 +33,7 @@ export default function Header() {
   }, [session?.user, setUser]);
 
   return (
-    <header className="sticky top-0 mx-auto w-full border-b backdrop-blur">
+    <header className="sticky top-0 mx-auto w-full border-b backdrop-blur z-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
@@ -46,7 +46,11 @@ export default function Header() {
 
           <nav className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <Link key={link.id} href={link.href} onClick={(e) => e.preventDefault()} className="text-sm font-medium">
+              <Link
+                key={link.id}
+                href={link.href}
+                className="text-sm font-medium"
+              >
                 {link.title}
               </Link>
             ))}
