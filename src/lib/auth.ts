@@ -10,8 +10,11 @@ const cookieOptions = {
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax" as const,
   path: "/",
-  // Définir le domaine pour les cookies
+  // Définir le domaine pour les cookies en production
   domain: process.env.NODE_ENV === "production" ? ".immo1.shop" : undefined,
+  // Ajouter des options pour améliorer la sécurité
+  httpOnly: true,
+  maxAge: 30 * 24 * 60 * 60, // 30 jours
 };
 
 export const auth = betterAuth({
@@ -21,6 +24,12 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    // Ajouter des options pour la validation des mots de passe
+    passwordValidation: {
+      minLength: 8,
+      requireNumbers: true,
+      requireSpecialChars: true,
+    },
   },
   emailVerification: {
     sendOnSignUp: true,
@@ -41,11 +50,9 @@ export const auth = betterAuth({
 
         if (!result.success) {
           console.error("Échec de l'envoi d'email:", result.message);
-          // Ne pas afficher de toast ici, car cela peut causer des problèmes côté client
         }
       } catch (error) {
         console.error("Erreur lors de l'envoi d'email:", error);
-        // Ne pas afficher de toast ici, car cela peut causer des problèmes côté client
       }
     },
   },
@@ -95,6 +102,11 @@ export const auth = betterAuth({
   plugins: [admin(), nextCookies()],
   // Configuration des cookies au niveau de l'authentification
   cookies: cookieOptions,
+  // Ajouter des options pour la gestion des sessions
+  session: {
+    maxAge: 30 * 24 * 60 * 60, // 30 jours
+    updateAge: 24 * 60 * 60, // 1 jour
+  },
 });
 
 type Session = typeof auth.$Infer.Session;

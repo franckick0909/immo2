@@ -15,7 +15,7 @@ const nextConfig = {
         headers: [
           {
             key: "Access-Control-Allow-Origin",
-            value: "https://immo1.shop",
+            value: "*", // Autoriser toutes les origines pour les requêtes API
           },
           {
             key: "Access-Control-Allow-Methods",
@@ -28,6 +28,10 @@ const nextConfig = {
           {
             key: "Access-Control-Allow-Credentials",
             value: "true",
+          },
+          {
+            key: "Access-Control-Max-Age",
+            value: "86400", // 24 heures
           },
         ],
       },
