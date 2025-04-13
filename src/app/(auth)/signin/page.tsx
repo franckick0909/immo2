@@ -27,6 +27,59 @@ export default function SignIn() {
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
 
+  // Fonction pour gérer la connexion
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      toast.error("Veuillez remplir tous les champs");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signIn.email(
+        {
+          email,
+          password,
+        },
+        {
+          onRequest: () => {
+            setLoading(true);
+          },
+          onResponse: () => {
+            setLoading(false);
+          },
+          onError: (ctx) => {
+            console.error("Erreur de connexion:", ctx.error);
+            if (ctx.error.status === 401) {
+              toast.error("Email ou mot de passe incorrect");
+            } else if (ctx.error.status === 400) {
+              toast.error("Requête invalide");
+            } else if (ctx.error.status === 500) {
+              toast.error("Erreur serveur, veuillez réessayer plus tard");
+            } else {
+              toast.error(ctx.error.message || "Erreur de connexion");
+            }
+          },
+          onSuccess: async () => {
+            toast.success("Connexion réussie");
+            setEmail("");
+            setPassword("");
+            setRememberMe(false);
+
+            // Attendre un peu avant de rediriger pour s'assurer que la session est établie
+            setTimeout(() => {
+              router.push("/");
+            }, 500);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Erreur lors de la connexion:", error);
+      toast.error("Une erreur est survenue lors de la connexion");
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-center items-center h-screen w-full">
       <Card className="w-full max-w-md">
@@ -87,40 +140,7 @@ export default function SignIn() {
               type="submit"
               className="w-full"
               disabled={loading}
-              onClick={async () => {
-                await signIn.email(
-                  {
-                    email,
-                    password,
-                  },
-                  {
-                    onRequest: () => {
-                      setLoading(true);
-                    },
-                    onResponse: () => {
-                      setLoading(false);
-                    },
-                    onError: (ctx) => {
-                      if (ctx.error.status === 401) {
-                        toast.error("Invalid credentials 401");
-                      } else if (ctx.error.status === 400) {
-                        toast.error("Invalid credentials 400");
-                      } else if (ctx.error.status === 500) {
-                        toast.error("Internal server error 500");
-                      } else {
-                        toast.error(ctx.error.message);
-                      }
-                    },
-                    onSuccess: async () => {
-                      toast.success("Connexion réussie");
-                      setEmail("");
-                      setPassword("");
-                      setRememberMe(false);
-                      router.push("/profile");
-                    },
-                  }
-                );
-              }}
+              onClick={handleSignIn}
             >
               {loading ? (
                 <Loader2 size={16} className="animate-spin" />
@@ -143,7 +163,7 @@ export default function SignIn() {
                   await signIn.social(
                     {
                       provider: "google",
-                      callbackURL: "/auth/profile",
+                      callbackURL: "/",
                     },
                     {
                       onRequest: () => {
@@ -157,7 +177,7 @@ export default function SignIn() {
                       },
                       onSuccess: () => {
                         toast.success("Connexion réussie");
-                        router.push("/profile");
+                        router.push("/");
                       },
                     }
                   );
@@ -196,7 +216,7 @@ export default function SignIn() {
                   await signIn.social(
                     {
                       provider: "github",
-                      callbackURL: "/auth/profile",
+                      callbackURL: "/",
                     },
                     {
                       onRequest: () => {
@@ -210,7 +230,7 @@ export default function SignIn() {
                       },
                       onSuccess: () => {
                         toast.success("Connexion réussie");
-                        router.push("/auth/profile");
+                        router.push("/");
                       },
                     }
                   );

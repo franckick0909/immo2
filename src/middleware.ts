@@ -45,7 +45,7 @@ export default async function middleware(request: NextRequest) {
       return new NextResponse(null, {
         status: 200,
         headers: {
-          "Access-Control-Allow-Origin": "https://www.immo1.shop",
+          "Access-Control-Allow-Origin": "*", // Accepter toutes les origines
           "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
           "Access-Control-Allow-Credentials": "true",
@@ -54,10 +54,7 @@ export default async function middleware(request: NextRequest) {
     }
 
     const response = NextResponse.next();
-    response.headers.set(
-      "Access-Control-Allow-Origin",
-      "https://www.immo1.shop"
-    );
+    response.headers.set("Access-Control-Allow-Origin", "*"); // Accepter toutes les origines
     response.headers.set("Access-Control-Allow-Credentials", "true");
     return response;
   }
@@ -85,32 +82,42 @@ export default async function middleware(request: NextRequest) {
   const isPasswordRoute = passwordRoutes.includes(pathName);
   const isAdminRoute = adminRoutes.includes(pathName);
 
-  const { data: session } = await betterFetch<Session>(
-    "/api/auth/get-session",
-    {
-      baseURL: request.nextUrl.origin,
-      headers: {
-        cookie: request.headers.get("cookie") || "",
-      },
-    }
-  );
+  try {
+    const { data: session } = await betterFetch<Session>(
+      "/api/auth/get-session",
+      {
+        baseURL: request.nextUrl.origin,
+        headers: {
+          cookie: request.headers.get("cookie") || "",
+        },
+      }
+    );
 
-  if (!session) {
+    if (!session) {
+      if (isAuthRoute || isPasswordRoute) {
+        return NextResponse.next();
+      }
+      return NextResponse.redirect(new URL("/signin", request.url));
+    }
+
     if (isAuthRoute || isPasswordRoute) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    if (isAdminRoute && session.user.role !== "admin") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error("Erreur lors de la vérification de la session:", error);
+    // En cas d'erreur, permettre l'accès aux routes publiques
+    if (isPublicRoute || isAuthRoute || isPasswordRoute) {
       return NextResponse.next();
     }
+    // Sinon, rediriger vers la page de connexion
     return NextResponse.redirect(new URL("/signin", request.url));
   }
-
-  if (isAuthRoute || isPasswordRoute) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  if (isAdminRoute && session.user.role !== "admin") {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  return NextResponse.next();
 }
 
 export const config = {
