@@ -33,18 +33,42 @@ const nextConfig = {
             key: "Access-Control-Max-Age",
             value: "86400", // 24 heures
           },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains",
+          },
         ],
       },
     ];
   },
   async redirects() {
     return [
+      // Redirection de vercel.app vers le domaine principal
       {
         source: "/:path*",
         has: [
           {
             type: "host",
             value: "immo2-franckicks.vercel.app",
+          },
+        ],
+        destination: "https://immo1.shop/:path*",
+        permanent: true,
+      },
+      // Forcer HTTPS
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "immo1.shop",
+          },
+        ],
+        missing: [
+          {
+            type: "header",
+            key: "x-forwarded-proto",
+            value: "https",
           },
         ],
         destination: "https://immo1.shop/:path*",
