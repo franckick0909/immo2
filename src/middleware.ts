@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { betterFetch } from "@better-fetch/fetch";
 import { NextRequest, NextResponse } from "next/server";
 
+// Routes qui nécessitent une authentification
 const authRoutes = [
   "/signin",
   "/signup",
@@ -11,6 +12,29 @@ const authRoutes = [
 ];
 const passwordRoutes = ["/reset-password"];
 const adminRoutes = ["/admin"];
+
+// Routes publiques qui ne nécessitent pas d'authentification
+const publicRoutes = [
+  "/",
+  "/about",
+  "/contact",
+  "/properties",
+  "/properties/[id]",
+  "/blog",
+  "/blog/[id]",
+  "/faq",
+  "/terms",
+  "/privacy",
+  // Routes du dossier (immo)
+  "/achat",
+  "/achat/[id]",
+  "/location",
+  "/location/[id]",
+  "/luxe",
+  "/luxe/[id]",
+  "/vente",
+  "/vente/[id]",
+];
 
 type Session = typeof auth.$Infer.Session;
 
@@ -38,8 +62,25 @@ export default async function middleware(request: NextRequest) {
     return response;
   }
 
-  // Logique d'authentification existante
   const pathName = request.nextUrl.pathname;
+
+  // Vérifier si la route est publique
+  const isPublicRoute = publicRoutes.some((route) => {
+    // Gérer les routes dynamiques comme /properties/[id]
+    if (route.includes("[") && route.includes("]")) {
+      const routePattern = new RegExp(
+        "^" + route.replace(/\[.*?\]/g, "[^/]+") + "$"
+      );
+      return routePattern.test(pathName);
+    }
+    return pathName === route || pathName.startsWith(route + "/");
+  });
+
+  // Si c'est une route publique, permettre l'accès sans authentification
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
   const isAuthRoute = authRoutes.includes(pathName);
   const isPasswordRoute = passwordRoutes.includes(pathName);
   const isAdminRoute = adminRoutes.includes(pathName);
