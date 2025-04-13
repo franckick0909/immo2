@@ -36,16 +36,33 @@ const publicRoutes = [
   "/vente/[id]",
 ];
 
+// Domaines autorisés
+const allowedDomains = ["immo1.shop", "www.immo1.shop"];
+
 type Session = typeof auth.$Infer.Session;
 
 export default async function middleware(request: NextRequest) {
+  // Rediriger les requêtes de immo2-franckicks.vercel.app vers immo1.shop
+  if (request.headers.get("host")?.includes("immo2-franckicks.vercel.app")) {
+    const url = request.nextUrl.clone();
+    url.host = "immo1.shop";
+    return NextResponse.redirect(url);
+  }
+
   // Gestion des en-têtes CORS pour les routes API
   if (request.nextUrl.pathname.startsWith("/api/")) {
+    const origin = request.headers.get("origin") || "";
+    const isAllowedOrigin = allowedDomains.some((domain) =>
+      origin.includes(domain)
+    );
+
     if (request.method === "OPTIONS") {
       return new NextResponse(null, {
         status: 200,
         headers: {
-          "Access-Control-Allow-Origin": "*", // Accepter toutes les origines
+          "Access-Control-Allow-Origin": isAllowedOrigin
+            ? origin
+            : allowedDomains[0],
           "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
           "Access-Control-Allow-Credentials": "true",
@@ -54,7 +71,10 @@ export default async function middleware(request: NextRequest) {
     }
 
     const response = NextResponse.next();
-    response.headers.set("Access-Control-Allow-Origin", "*"); // Accepter toutes les origines
+    response.headers.set(
+      "Access-Control-Allow-Origin",
+      isAllowedOrigin ? origin : allowedDomains[0]
+    );
     response.headers.set("Access-Control-Allow-Credentials", "true");
     return response;
   }
@@ -83,15 +103,23 @@ export default async function middleware(request: NextRequest) {
   const isAdminRoute = adminRoutes.includes(pathName);
 
   try {
+    // Utiliser l'URL de l'application configurée dans les variables d'environnement
+    const baseURL = process.env.NEXT_PUBLIC_APP_URL || "https://immo1.shop";
+
+    console.log("Vérification de session avec baseURL:", baseURL);
+    console.log("Cookies:", request.headers.get("cookie"));
+
     const { data: session } = await betterFetch<Session>(
       "/api/auth/get-session",
       {
-        baseURL: request.nextUrl.origin,
+        baseURL: baseURL,
         headers: {
           cookie: request.headers.get("cookie") || "",
         },
       }
     );
+
+    console.log("Session:", session ? "Trouvée" : "Non trouvée");
 
     if (!session) {
       if (isAuthRoute || isPasswordRoute) {

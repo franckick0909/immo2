@@ -1,14 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    domains: [
+      "res.cloudinary.com",
+      "lh3.googleusercontent.com",
+      "avatars.githubusercontent.com",
+    ],
+  },
   async headers() {
     return [
       {
-        // Appliquer ces règles à toutes les routes API
-        source: "/api/:path*",
+        // Appliquer ces en-têtes à toutes les routes
+        source: "/:path*",
         headers: [
           {
             key: "Access-Control-Allow-Origin",
-            value: "https://www.immo1.shop",
+            value: "https://immo1.shop",
           },
           {
             key: "Access-Control-Allow-Methods",
@@ -18,32 +25,28 @@ const nextConfig = {
             key: "Access-Control-Allow-Headers",
             value: "Content-Type, Authorization",
           },
-          { key: "Access-Control-Allow-Credentials", value: "true" },
+          {
+            key: "Access-Control-Allow-Credentials",
+            value: "true",
+          },
         ],
       },
     ];
   },
-  images: {
-    remotePatterns: [
+  async redirects() {
+    return [
       {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
-        port: "",
-        pathname: "/dldrwtewc/**",
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "immo2-franckicks.vercel.app",
+          },
+        ],
+        destination: "https://immo1.shop/:path*",
+        permanent: true,
       },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-        port: "",
-        pathname: "/a/**",
-      },
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-        port: "",
-        pathname: "/u/**",
-      },
-    ],
+    ];
   },
 };
 

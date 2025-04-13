@@ -5,6 +5,15 @@ import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins/admin";
 import { prisma } from "./prisma";
 
+// Configuration des cookies pour permettre le partage entre les domaines
+const cookieOptions = {
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  // Définir le domaine pour les cookies
+  domain: process.env.NODE_ENV === "production" ? ".immo1.shop" : undefined,
+};
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -84,6 +93,8 @@ export const auth = betterAuth({
     },
   },
   plugins: [admin(), nextCookies()],
+  // Configuration des cookies au niveau de l'authentification
+  cookies: cookieOptions,
 });
 
 type Session = typeof auth.$Infer.Session;
