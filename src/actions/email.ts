@@ -13,15 +13,27 @@ export async function sendEmail({
 }) {
   console.log("Tentative d'envoi d'email à:", to);
   console.log("Sujet:", subject);
+  console.log("Texte:", text);
 
+  // Vérifier les variables d'environnement
   if (!process.env.SENDGRID_API_KEY) {
     console.error("SENDGRID_API_KEY n'est pas définie");
-    throw new Error("SENDGRID_API_KEY environment variable is not set");
+    return {
+      success: false,
+      message: "SENDGRID_API_KEY environment variable is not set",
+    };
   }
+
   if (!process.env.EMAIL_FROM) {
     console.error("EMAIL_FROM n'est pas définie");
-    throw new Error("EMAIL_FROM environment variable is not set");
+    return {
+      success: false,
+      message: "EMAIL_FROM environment variable is not set",
+    };
   }
+
+  console.log("EMAIL_FROM:", process.env.EMAIL_FROM);
+  console.log("SENDGRID_API_KEY est définie:", !!process.env.SENDGRID_API_KEY);
 
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -38,9 +50,10 @@ export async function sendEmail({
 
     if (response.statusCode !== 202) {
       console.error(`SendGrid API a retourné le code ${response.statusCode}`);
-      throw new Error(
-        `SendGrid API returned status code ${response.statusCode}`
-      );
+      return {
+        success: false,
+        message: `SendGrid API returned status code ${response.statusCode}`,
+      };
     }
 
     console.log(

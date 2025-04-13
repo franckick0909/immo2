@@ -3,7 +3,6 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins/admin";
-import { toast } from "sonner";
 import { prisma } from "./prisma";
 
 export const auth = betterAuth({
@@ -18,12 +17,9 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url, token }) => {
-      toast.success(`Envoi d'email de vérification à: ${user.email}`);
       console.log("Envoi d'email de vérification à:", user.email);
       console.log("URL de vérification:", url);
-      toast.success(`URL de vérification: ${url}`);
       console.log("Token:", token);
-      toast.success(`Token: ${token}`);
 
       try {
         const result = await sendEmail({
@@ -33,15 +29,14 @@ export const auth = betterAuth({
         });
 
         console.log("Résultat de l'envoi d'email:", result);
-        toast.success(`Résultat de l'envoi d'email: ${result}`);
 
         if (!result.success) {
           console.error("Échec de l'envoi d'email:", result.message);
-          toast.error(`Échec de l'envoi d'email: ${result.message}`);
+          // Ne pas afficher de toast ici, car cela peut causer des problèmes côté client
         }
       } catch (error) {
         console.error("Erreur lors de l'envoi d'email:", error);
-        toast.error(`Erreur lors de l'envoi d'email: ${error}`);
+        // Ne pas afficher de toast ici, car cela peut causer des problèmes côté client
       }
     },
   },
@@ -56,9 +51,7 @@ export const auth = betterAuth({
       enabled: true,
       sendChangeEmailVerification: async ({ newEmail, url }) => {
         console.log("Envoi d'email de changement d'email à:", newEmail);
-        toast.success(`Envoi d'email de changement d'email à: ${newEmail}`);
         console.log("URL de vérification:", url);
-        toast.success(`URL de vérification: ${url}`);
 
         try {
           const result = await sendEmail({
@@ -68,15 +61,12 @@ export const auth = betterAuth({
           });
 
           console.log("Résultat de l'envoi d'email:", result);
-          toast.success(`Résultat de l'envoi d'email: ${result}`);
 
           if (!result.success) {
             console.error("Échec de l'envoi d'email:", result.message);
-            toast.error(`Échec de l'envoi d'email: ${result.message}`);
           }
         } catch (error) {
           console.error("Erreur lors de l'envoi d'email:", error);
-          toast.error(`Erreur lors de l'envoi d'email: ${error}`);
         }
       },
     },

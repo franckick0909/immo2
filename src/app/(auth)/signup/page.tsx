@@ -71,22 +71,28 @@ export default function SignUp() {
           },
           onRequest: () => {
             setLoading(true);
-            toast.success(
-              "Votre email a été envoyé, veuillez vérifier votre email"
-            );
           },
           onError: (ctx) => {
+            console.error("Erreur lors de l'inscription:", ctx.error);
+            setLoading(false);
+
             if (ctx.error.status === 403) {
               toast.error(
-                ctx.error.message +
-                  "Votre email n'est pas vérifié, veuillez vérifier votre email"
+                "Votre email n'est pas vérifié, veuillez vérifier votre email"
               );
             } else {
-              toast.error(ctx.error.message);
+              toast.error(
+                ctx.error.message ||
+                  "Une erreur est survenue lors de l'inscription"
+              );
             }
           },
           onSuccess: async () => {
-            toast.success("Compte créé avec succès");
+            toast.success(
+              "Compte créé avec succès! Vérifiez votre email pour confirmer votre inscription."
+            );
+
+            // Réinitialiser les champs du formulaire
             setFirstName("");
             setLastName("");
             setEmail("");
@@ -94,6 +100,8 @@ export default function SignUp() {
             setPasswordConfirmation("");
             setImage(null);
             setImagePreview(null);
+
+            // Rediriger vers la page d'accueil
             router.push("/");
           },
         },
