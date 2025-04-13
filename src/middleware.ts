@@ -15,6 +15,30 @@ const adminRoutes = ["/admin"];
 type Session = typeof auth.$Infer.Session;
 
 export default async function middleware(request: NextRequest) {
+  // Gestion des en-têtes CORS pour les routes API
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    if (request.method === "OPTIONS") {
+      return new NextResponse(null, {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "https://www.immo1.shop",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Credentials": "true",
+        },
+      });
+    }
+
+    const response = NextResponse.next();
+    response.headers.set(
+      "Access-Control-Allow-Origin",
+      "https://www.immo1.shop"
+    );
+    response.headers.set("Access-Control-Allow-Credentials", "true");
+    return response;
+  }
+
+  // Logique d'authentification existante
   const pathName = request.nextUrl.pathname;
   const isAuthRoute = authRoutes.includes(pathName);
   const isPasswordRoute = passwordRoutes.includes(pathName);
@@ -25,7 +49,7 @@ export default async function middleware(request: NextRequest) {
     {
       baseURL: request.nextUrl.origin,
       headers: {
-        cookie: request.headers.get("cookie") || "", // Forward the cookies from the request
+        cookie: request.headers.get("cookie") || "",
       },
     }
   );
@@ -44,10 +68,14 @@ export default async function middleware(request: NextRequest) {
   if (isAdminRoute && session.user.role !== "admin") {
     return NextResponse.redirect(new URL("/", request.url));
   }
+
   return NextResponse.next();
 }
 
 export const config = {
   runtime: "nodejs",
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*\\.png$).*"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico).*\\.png$).*",
+    "/api/:path*",
+  ],
 };
