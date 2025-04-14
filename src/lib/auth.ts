@@ -31,6 +31,28 @@ prisma
     console.error("🔍 URL directe:", process.env.DIRECT_URL);
   });
 
+// Vérifier les variables d'environnement
+console.log("🔍 Vérification des variables d'environnement:");
+console.log("🔍 NODE_ENV:", process.env.NODE_ENV);
+console.log("🔍 NEXT_PUBLIC_APP_URL:", process.env.NEXT_PUBLIC_APP_URL);
+console.log("🔍 BETTER_AUTH_URL:", process.env.BETTER_AUTH_URL);
+console.log(
+  "🔍 GITHUB_CLIENT_ID:",
+  process.env.GITHUB_CLIENT_ID ? "✅ Présent" : "❌ Manquant"
+);
+console.log(
+  "🔍 GITHUB_CLIENT_SECRET:",
+  process.env.GITHUB_CLIENT_SECRET ? "✅ Présent" : "❌ Manquant"
+);
+console.log(
+  "🔍 GOOGLE_CLIENT_ID:",
+  process.env.GOOGLE_CLIENT_ID ? "✅ Présent" : "❌ Manquant"
+);
+console.log(
+  "🔍 GOOGLE_CLIENT_SECRET:",
+  process.env.GOOGLE_CLIENT_SECRET ? "✅ Présent" : "❌ Manquant"
+);
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
