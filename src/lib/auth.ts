@@ -20,10 +20,16 @@ const cookieOptions = {
 // Vérifier la connexion à la base de données
 prisma
   .$connect()
-  .then(() => console.log("✅ Connexion à la base de données réussie"))
-  .catch((error) =>
-    console.error("❌ Erreur de connexion à la base de données:", error)
-  );
+  .then(() => {
+    console.log("✅ Connexion à la base de données réussie");
+    console.log("🔍 URL de la base de données:", process.env.DATABASE_URL);
+    console.log("🔍 URL directe:", process.env.DIRECT_URL);
+  })
+  .catch((error) => {
+    console.error("❌ Erreur de connexion à la base de données:", error);
+    console.error("🔍 URL de la base de données:", process.env.DATABASE_URL);
+    console.error("🔍 URL directe:", process.env.DIRECT_URL);
+  });
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -39,12 +45,22 @@ export const auth = betterAuth({
       requireSpecialChars: true,
     },
     onSignIn: async (user: { email: string; id: string }) => {
-      console.log("🔐 Tentative de connexion pour:", user.email);
-      return true;
+      try {
+        console.log("🔐 Tentative de connexion pour:", user.email);
+        return true;
+      } catch (error) {
+        console.error("❌ Erreur lors de la connexion:", error);
+        return false;
+      }
     },
     onSignUp: async (user: { email: string; id: string }) => {
-      console.log("📝 Nouvelle inscription:", user.email);
-      return true;
+      try {
+        console.log("📝 Nouvelle inscription:", user.email);
+        return true;
+      } catch (error) {
+        console.error("❌ Erreur lors de l'inscription:", error);
+        return false;
+      }
     },
   },
   emailVerification: {
