@@ -19,26 +19,26 @@ model User {
   email         String    @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  name          String
-  emailVerified Boolean
+  name          String?
+  emailVerified DateTime?
   image         String?
   premium       Boolean?  @default(false)
   sessions      Session[]
   accounts      Account[]
   role          String?   @default("user")
-  banned        Boolean?
+  banned        Boolean?  @default(false)
   banReason     String?
   banExpires    DateTime?
 
-  @@map("user")
+  @@map("users")
 }
 
 model Session {
-  id        String   @id
+  id        String   @id @default(uuid())
   expiresAt DateTime
-  token     String
-  createdAt DateTime
-  updatedAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
   userId    String
@@ -46,13 +46,12 @@ model Session {
 
   impersonatedBy String?
 
-  @@unique([token])
-  @@map("session")
+  @@map("sessions")
 }
 
 model Account {
-  id                    String    @id
-  accountId             String
+  id                    String    @id @default(uuid())
+  accountId             String    @unique
   providerId            String
   userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -63,19 +62,19 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
-  createdAt             DateTime
-  updatedAt             DateTime
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
-  @@map("account")
+  @@map("accounts")
 }
 
 model Verification {
-  id         String    @id
+  id         String   @id @default(uuid())
   identifier String
   value      String
   expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  @@map("verification")
+  @@map("verifications")
 }
