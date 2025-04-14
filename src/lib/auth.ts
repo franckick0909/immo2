@@ -17,6 +17,14 @@ const cookieOptions = {
   maxAge: 30 * 24 * 60 * 60, // 30 jours
 };
 
+// Vérifier la connexion à la base de données
+prisma
+  .$connect()
+  .then(() => console.log("✅ Connexion à la base de données réussie"))
+  .catch((error) =>
+    console.error("❌ Erreur de connexion à la base de données:", error)
+  );
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
@@ -30,14 +38,22 @@ export const auth = betterAuth({
       requireNumbers: true,
       requireSpecialChars: true,
     },
+    onSignIn: async (user: { email: string; id: string }) => {
+      console.log("🔐 Tentative de connexion pour:", user.email);
+      return true;
+    },
+    onSignUp: async (user: { email: string; id: string }) => {
+      console.log("📝 Nouvelle inscription:", user.email);
+      return true;
+    },
   },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url, token }) => {
-      console.log("Envoi d'email de vérification à:", user.email);
-      console.log("URL de vérification:", url);
-      console.log("Token:", token);
+      console.log("📧 Envoi d'email de vérification à:", user.email);
+      console.log("🔗 URL de vérification:", url);
+      console.log("🔑 Token:", token);
 
       try {
         const result = await sendEmail({
@@ -46,13 +62,13 @@ export const auth = betterAuth({
           text: `Cliquez sur le lien pour vérifier votre email: ${url}`,
         });
 
-        console.log("Résultat de l'envoi d'email:", result);
+        console.log("📨 Résultat de l'envoi d'email:", result);
 
         if (!result.success) {
-          console.error("Échec de l'envoi d'email:", result.message);
+          console.error("❌ Échec de l'envoi d'email:", result.message);
         }
       } catch (error) {
-        console.error("Erreur lors de l'envoi d'email:", error);
+        console.error("❌ Erreur lors de l'envoi d'email:", error);
       }
     },
   },
@@ -66,8 +82,8 @@ export const auth = betterAuth({
     changeEmail: {
       enabled: true,
       sendChangeEmailVerification: async ({ newEmail, url }) => {
-        console.log("Envoi d'email de changement d'email à:", newEmail);
-        console.log("URL de vérification:", url);
+        console.log("📧 Envoi d'email de changement d'email à:", newEmail);
+        console.log("🔗 URL de vérification:", url);
 
         try {
           const result = await sendEmail({
@@ -76,13 +92,13 @@ export const auth = betterAuth({
             text: `Cliquez sur le lien pour vérifier: ${url}`,
           });
 
-          console.log("Résultat de l'envoi d'email:", result);
+          console.log("📨 Résultat de l'envoi d'email:", result);
 
           if (!result.success) {
-            console.error("Échec de l'envoi d'email:", result.message);
+            console.error("❌ Échec de l'envoi d'email:", result.message);
           }
         } catch (error) {
-          console.error("Erreur lors de l'envoi d'email:", error);
+          console.error("❌ Erreur lors de l'envoi d'email:", error);
         }
       },
     },
